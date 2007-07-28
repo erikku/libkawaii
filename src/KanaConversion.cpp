@@ -390,6 +390,13 @@ QString katakanaToHiragana(const QString& string)
     for(int i = 0; i < basicKatakana.count(); i++)
         text.replace(basicKatakana.at(i), basicHiragana.at(i));
 
+	// Small Katakana
+	int smallKanaCount = smallKana.count() / 2;
+	for(int i = 0; i < smallKanaCount; i++)
+		text.replace(smallKana.at(i + smallKanaCount), smallKana.at(i));
+
+	text.replace( QRegExp( QString::fromUtf8("ン") ), QString::fromUtf8("ん") );
+
 	return text;
 };
 
@@ -405,6 +412,13 @@ QString hiraganaToKatakana(const QString& string)
     // Basic Hiragana
     for(int i = 0; i < basicHiragana.count(); i++)
         text.replace(basicHiragana.at(i), basicKatakana.at(i));
+
+	// Small Hiragana
+	int smallKanaCount = smallKana.count() / 2;
+	for(int i = 0; i < smallKanaCount; i++)
+		text.replace(smallKana.at(i), smallKana.at(i + smallKanaCount));
+
+	text.replace( QRegExp( QString::fromUtf8("ん") ), QString::fromUtf8("ン") );
 
 	return text;
 };
