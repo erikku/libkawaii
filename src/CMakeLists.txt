@@ -49,10 +49,12 @@ SET(libkawaii_SRCS
 	ChasenUtils.cpp
 	KanaConversion.cpp
 	Label.cpp
+	LineEdit.cpp
 )
 
 SET(libkawaii_HDRS
 	Label.h
+	LineEdit.h
 )
 
 SET(libkawaii_HDRS_NOMOC

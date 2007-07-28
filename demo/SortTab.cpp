@@ -21,6 +21,7 @@
 
 #include <QtGui/QLabel>
 #include <QtGui/QLineEdit>
+#include <QtGui/QPushButton>
 #include <QtGui/QGridLayout>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QVBoxLayout>
@@ -30,6 +31,7 @@
 
 #include <kawaii/ChasenUtils.h>
 #include <kawaii/KanaConversion.h>
+#include <kawaii/LineEdit.h>
 
 SortTab::SortTab(QWidget *parent) : QWidget(parent)
 {
@@ -42,12 +44,19 @@ SortTab::SortTab(QWidget *parent) : QWidget(parent)
 		" that for a key instead of kana. To remove a entry, double click it.</p>") );
 
 	QLabel *entryLabel = new QLabel( tr("Text:") );
-	mEntryEdit = new QLineEdit;
+	// mEntryEdit = new QLineEdit;
+	mEntryEdit = new KawaiiLineEdit;
 	mEntryEdit->setToolTip( tr("Enter the text you want to sort in this field.") );
+
+	QPushButton *romajiModeButton = new QPushButton( tr("Romaji Mode") );
+	romajiModeButton->setCheckable(true);
+	romajiModeButton->setChecked( ((KawaiiLineEdit*)mEntryEdit)->romajiMode() );
+	connect(romajiModeButton, SIGNAL(toggled(bool)), mEntryEdit, SLOT(setRomajiMode(bool)));
 
 	QHBoxLayout *entryLayout = new QHBoxLayout;
 	entryLayout->addWidget(entryLabel);
 	entryLayout->addWidget(mEntryEdit);
+	entryLayout->addWidget(romajiModeButton);
 
 	// Sort List Widgets
 	QLabel *normalLabel = new QLabel( tr("<b>Normal</b>") );
