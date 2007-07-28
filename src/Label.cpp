@@ -172,7 +172,7 @@ void KawaiiLabel::processLine(const QString& text, int initial_start, int end, R
 {
 	/// @TODO Do something if there is currently no chunks and we want a line break
 
-	std::cout << "Processing Line: " << text.toLocal8Bit().data() << std::endl;
+	// std::cout << "Processing Line: " << text.toLocal8Bit().data() << std::endl;
 
 	int pos = 0, start = initial_start, spaceIndex;
 	bool closing;
@@ -196,6 +196,7 @@ void KawaiiLabel::processLine(const QString& text, int initial_start, int end, R
 		if(pos > end)
 			break;
 
+		/*
 		std::cout << "Start: " << start << std::endl;
 		std::cout << "Matched index: " << pos << std::endl;
 		std::cout << "Text length: " << (pos - start) << std::endl;
@@ -203,6 +204,7 @@ void KawaiiLabel::processLine(const QString& text, int initial_start, int end, R
 		std::cout << "Matched tag: <" << tagRx.cap(1).toLocal8Bit().data() << ">" << std::endl;
 		std::cout << "Matched length: " << tagRx.matchedLength() << std::endl;
 		std::cout << "Ruby mode: " << state->rubyState.toLocal8Bit().data() << std::endl;
+		*/
 
 		// Before we make any changes to the state, process the text we have so far (if any)
 		flushText(text, start, pos, state);
@@ -210,8 +212,8 @@ void KawaiiLabel::processLine(const QString& text, int initial_start, int end, R
 		// If the tag starts with a slash, it's a closing tag
 		closing = (tagRx.cap(1).at(0) == '/');
 
-		std::cout << "Closing tag: " << (closing ? "yes" : "no") << std::endl;
-		std::cout << "==================================================" << std::endl;
+		// std::cout << "Closing tag: " << (closing ? "yes" : "no") << std::endl;
+		// std::cout << "==================================================" << std::endl;
 
 		// Strip out slashes from the tag
 		tag = tagRx.cap(1);
@@ -355,8 +357,8 @@ void KawaiiLabel::processLine(const QString& text, int initial_start, int end, R
 		{
 			if(closing)
 			{
-				std::cout << "Creating ruby width " << state->bottomChunks.count() << " bottom chunks and " <<
-					state->topChunks.count() << " top chunks." << std::endl;
+				// std::cout << "Creating ruby width " << state->bottomChunks.count() << " bottom chunks and " <<
+					// state->topChunks.count() << " top chunks." << std::endl;
 
 				// create a ruby chunk out of the 2 text buffers
 				FontChunk *chunk = createRubyChunk(state->bottomChunks, state->bottomFont.top(), state->topChunks, state->topFont.top());
@@ -464,7 +466,7 @@ void KawaiiLabel::flushText(const QString& text, int start, int pos, RubyState *
 	currentX = leftMargin()
 
 #define lineFeed() \
-	baseLine += lineHeight - ascent + leading + mLineSpacing; \
+	baseLine += lastLineDescent + leading + mLineSpacing + ascent; \
 	if((baseLine + bottomMargin()) > height()) return
 
 void KawaiiLabel::paintEvent(QPaintEvent *event)
@@ -475,18 +477,22 @@ void KawaiiLabel::paintEvent(QPaintEvent *event)
 	QPainter painter(this);
 
 	int currentX = leftMargin();
-	int baseLine = topMargin();
 	int leading = bottomMetrics.leading();
+	int baseLine = topMargin() - leading - mLineSpacing;
 
-	int ascent, lineHeight;
+	int lastLineDescent = 0;
+	int ascent = 0, lineHeight = 0;
 	for(int z = 0; z < mLines.count(); z++)
 	{
 		FontChunks chunks = mLines.at(z);
 
+		lastLineDescent = lineHeight - ascent - 1;
 		ascent = mEqualLines ? mMaxAscent : mLineAscent.at(z);
 		lineHeight = mEqualLines ? mMaxLineHeight : mLineHeight.at(z);
 
-		baseLine += ascent;
+		carriageReturn();
+		lineFeed();
+
 		int runningWidth = 0;
 
 		for(int i = 0; i < chunks.count(); i++)
@@ -502,9 +508,6 @@ void KawaiiLabel::paintEvent(QPaintEvent *event)
 			painter.drawPixmap(currentX + ((chunks.at(i)->leftBearing < 0) ? chunks.at(i)->leftBearing : 0), baseLine - chunks.at(i)->ascent, chunks.at(i)->pixmap);
 			currentX += chunks.at(i)->width + leading + 1;
 		}
-
-		carriageReturn();
-		lineFeed();
 	}
 };
 
@@ -690,6 +693,9 @@ void KawaiiLabel::clearChunks()
 	}
 
 	mLines.clear();
+	mLineAscent.clear();
+	mLineHeight.clear();
+	mMaxAscent = mMaxLineHeight = 0;
 };
 
 int KawaiiLabel::leftMargin() const
@@ -775,15 +781,20 @@ QPair<int, int> KawaiiLabel::textIndexAt(const QPoint& point) const
 	int baseLine = topMargin();
 	int leading = bottomMetrics.leading();
 
-	int ascent, lineHeight;
+	int lastLineDescent = 0;
+	int ascent = 0, lineHeight = 0;
+
 	for(int z = 0; z < mLines.count(); z++)
 	{
 		FontChunks chunks = mLines.at(z);
 
+		lastLineDescent = lineHeight - ascent - 1;
 		ascent = mEqualLines ? mMaxAscent : mLineAscent.at(z);
 		lineHeight = mEqualLines ? mMaxLineHeight : mLineHeight.at(z);
 
-		baseLine += ascent;
+		carriageReturn();
+		lineFeed() QPair<int, int>(0, 0);
+
 		int runningWidth = 0;
 
 		// If we passed over it, return with 0, 0
@@ -843,9 +854,6 @@ QPair<int, int> KawaiiLabel::textIndexAt(const QPoint& point) const
 
 			currentX += chunks.at(i)->width + leading + 1;
 		}
-
-		carriageReturn();
-		lineFeed() QPair<int, int>(0, 0);
 	}
 
 	return QPair<int, int>(0, 0);
