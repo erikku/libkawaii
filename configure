@@ -1,0 +1,92 @@
+#! /bin/sh
+
+#  libkawaii - A Japanese language support library for Qt4
+#  Copyright (C) 2007 John Eric Martin <john.eric.martin@gmail.com>
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2 as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the
+#  Free Software Foundation, Inc.,
+#  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+BOLD="\033[1m"
+RED="\033[91m"
+GREEN="\033[92m"
+YELLOW="\033[93m"
+CYAN="\033[96m"
+NORMAL="\033[0m"
+
+# Make sure cmake is available.
+if command -v cmake >/dev/null 2>&1;
+then
+	CMAKE=cmake
+else
+	echo "Error - cmake is not available!"
+	exit 2
+fi
+
+
+help=false
+build="Release"
+prefix=/usr
+defines=""
+docs=OFF
+demo=ON
+
+# Parse the args
+for i in "$@"
+do
+	case $i in
+		--help )				help=true ;;
+		--debug )				build="Debug" ;;
+		--release )				build="Release" ;;
+		--prefix=* )			prefix="${i#--prefix=}" ;;
+		--enable-docs )			docs=ON ;;
+		--disable-docs )		docs=OFF ;;
+		--enable-demo )			demo=ON ;;
+		--disable-demo )		demo=OFF ;;
+		* )						echo "Unrecognised argument $i" ;;
+	esac
+done
+
+if [ "$help" = "true" ]
+then
+    echo "---------------------------------------"
+    echo "libkawaii Configuration Script"
+    echo "---------------------------------------"
+	echo
+	echo "--help			Show this message."
+	echo "--debug			Configure debug build."
+	echo "--release			Configure release build."
+	echo "--prefix=path		Installation prefix."
+	exit 0
+fi
+
+mkdir -p ./build
+cd ./build
+$CMAKE -DCMAKE_BUILD_TYPE=$build -DCMAKE_INSTALL_PREFIX=$prefix ${defines} -DBUILD_KAWAIIDEMO=$demo -DBUILD_DOCS=$docs -G "Unix Makefiles" .. || exit 1
+cd ..
+
+echo ""
+echo "Your configure completed "$GREEN"successfully"$NORMAL", now type "$BOLD"make"$NORMAL
+echo ""
+
+cat > Makefile << EOF
+all:
+	@make --no-print-directory -C build/
+install:
+	@make install --no-print-directory -C build/
+clean:
+	@make clean --no-print-directory -C build/
+distclean:
+	@rm -Rf build/
+	@rm -f Makefile
+EOF

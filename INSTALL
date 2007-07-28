@@ -1,0 +1,11 @@
+Please copy a utf8 encoded copy of ipadic into the ipadic folder before compiling.
+
+You can use the following:
+$ ./configure --prefix=/usr --enable-docs --enable-demo
+$ make
+$ sudo make install
+
+Requirements:
+* Qt 4.x.x
+* chasen
+* ipadic
