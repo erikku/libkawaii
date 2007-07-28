@@ -193,7 +193,7 @@ void setupConversionTables()
 		<< QString::fromUtf8("YU") << QString::fromUtf8("YO") << QString::fromUtf8("TSU");
 
 	specialKana << QString::fromUtf8(" he ") << QString::fromUtf8(" ha ") << QString::fromUtf8(" wo ")
-		<< QString::fromUtf8("。") << QString::fromUtf8("・")
+		<< QString::fromUtf8("。") // We removed the middle dot here - QString::fromUtf8("・")
 		<< QString::fromUtf8("、") << QString::fromUtf8("？") << QString::fromUtf8("〜")
 		<< QString::fromUtf8("！") << QString::fromUtf8("（") << QString::fromUtf8("）")
 		<< QString::fromUtf8("＊") << QString::fromUtf8("「") << QString::fromUtf8("」")
@@ -203,7 +203,7 @@ void setupConversionTables()
 		<< QString::fromUtf8("》");
 
 	specialRomaji << QString::fromUtf8(" e ") << QString::fromUtf8(" wa ") << QString::fromUtf8(" o ")
-		<< QString::fromUtf8(".") << QString::fromUtf8(" ")
+		<< QString::fromUtf8(".") // We removed the space here - QString::fromUtf8(" ")
 		<< QString::fromUtf8(",") << QString::fromUtf8("?") << QString::fromUtf8("~")
 		<< QString::fromUtf8("!") << QString::fromUtf8("(") << QString::fromUtf8(")")
 		<< QString::fromUtf8("*") << QString::fromUtf8("\"") << QString::fromUtf8("\"")
@@ -227,7 +227,7 @@ QString romajiToKana(const QString& string, bool special)
 	{
 		// Post stuff (things like brackets, punctuation, and small a/i/u/e/o)
     	for(int i = 0; i < specialKana.count(); i++)
-			text.replace(specialKana.at(i), specialRomaji.at(i));
+			text.replace(specialRomaji.at(i), specialKana.at(i));
 
 		// Small kana, a, i, u, e, o
 		for(int i = 0; i < smallKana.count(); i++)
