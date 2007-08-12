@@ -65,9 +65,9 @@ public:
 	FontChunks bottomChunks, topChunks, normalChunks;
 };
 
-KawaiiLabel::KawaiiLabel(QWidget *parent) : QWidget(parent), mRubySpacing(2), mLineSpacing(3), mIgnoreRubyDescent(true), mEqualLines(false)
+KawaiiLabel::KawaiiLabel(QWidget *parent) : QWidget(parent), mRubySpacing(2), mLineSpacing(3), mIgnoreRubyDescent(true),
+	mEqualLines(false), mAlignment(Qt::AlignTop | Qt::AlignLeft)
 {
-	setWindowTitle("KawaiiLabel");
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setMinimumSize(100, 100);
 	setMargin(6);
@@ -78,19 +78,11 @@ KawaiiLabel::KawaiiLabel(QWidget *parent) : QWidget(parent), mRubySpacing(2), mL
 	mTopFont.setPointSize( (int)(mBottomFont.pointSize() * 0.4f + 0.5f) );
 	mTopPen.setBrush( palette().brush(QPalette::Active, QPalette::Text) );
 	mBottomPen = mTopPen;
-
-	///////////////////////////////
-	mTopFont.setFamily("mikachan");
-	mTopFont.setPointSize(6);
-	mTopFont.setUnderline(true);
-	mBottomFont.setPointSize(14);
-	mBottomFont.setFamily("mikachan");
-	mBottomFont.setUnderline(true);
 };
 
-KawaiiLabel::KawaiiLabel(const QString& text, QWidget *parent) : QWidget(parent), mRubySpacing(2), mLineSpacing(3), mIgnoreRubyDescent(true), mEqualLines(false)
+KawaiiLabel::KawaiiLabel(const QString& text, QWidget *parent) : QWidget(parent), mRubySpacing(2), mLineSpacing(3), mIgnoreRubyDescent(true),
+	mEqualLines(false), mAlignment(Qt::AlignTop | Qt::AlignLeft)
 {
-	setWindowTitle("KawaiiLabel");
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setMinimumSize(100, 100);
 	setMargin(6);
@@ -102,14 +94,6 @@ KawaiiLabel::KawaiiLabel(const QString& text, QWidget *parent) : QWidget(parent)
 	mTopFont.setPointSize( (int)(mBottomFont.pointSize() * 0.4f + 0.5f) );
 	mTopPen.setBrush( palette().brush(QPalette::Active, QPalette::Text) );
 	mBottomPen = mTopPen;
-
-	///////////////////////////////
-	mTopFont.setFamily("mikachan");
-	mTopFont.setPointSize(6);
-	mTopFont.setUnderline(true);
-	mBottomFont.setPointSize(14);
-	mBottomFont.setFamily("mikachan");
-	mBottomFont.setUnderline(true);
 };
 
 KawaiiLabel::~KawaiiLabel()
@@ -460,10 +444,74 @@ void KawaiiLabel::flushText(const QString& text, int start, int pos, RubyState *
 	}
 
 	// This is inside a ruby tag but not inside <rb> or <rt>, ignore it
-}
+};
+
+void KawaiiLabel::calculateLineSizes(int *docHeight, QList<int> *lineWidths) const
+{
+	QFontMetrics bottomMetrics(mBottomFont);
+
+	int currentX = leftMargin();
+	int leading = bottomMetrics.leading();
+	int baseLine = topMargin() - leading - mLineSpacing;
+
+	int lastLineDescent = 0;
+	int ascent = 0, lineHeight = 0;
+
+	(*docHeight) = -topMargin();
+	lineWidths->clear();
+
+	for(int z = 0; z < mLines.count(); z++)
+	{
+		FontChunks chunks = mLines.at(z);
+
+		lastLineDescent = lineHeight - ascent - 1;
+		ascent = mEqualLines ? mMaxAscent : mLineAscent.at(z);
+		lineHeight = mEqualLines ? mMaxLineHeight : mLineHeight.at(z);
+
+		// Handle a new line
+		currentX = leftMargin();
+		baseLine += lastLineDescent + leading + mLineSpacing + ascent; \
+		if((baseLine + bottomMargin()) > height())
+		{
+			lineWidths->append(currentX);
+			return;
+		}
+		(*docHeight) = baseLine + (lineHeight - ascent - 1);
+
+		int runningWidth = 0;
+
+		for(int i = 0; i < chunks.count(); i++)
+		{
+			runningWidth += chunks.at(i)->width;
+			if((runningWidth + rightMargin()) > width())
+			{
+				runningWidth = 0;
+				
+				// Handle a new line
+				lineWidths->append(currentX);
+				currentX = leftMargin();
+				baseLine += lastLineDescent + leading + mLineSpacing + ascent; \
+				if((baseLine + bottomMargin()) > height())
+				{
+					lineWidths->append(currentX);
+					return;
+				}
+				(*docHeight) = baseLine + (lineHeight - ascent - 1);
+			}
+
+			currentX += chunks.at(i)->width + leading + 1;
+		}
+	}
+
+	lineWidths->append(currentX);
+};
 
 #define carriageReturn() \
-	currentX = leftMargin()
+	if( mAlignment.testFlag(Qt::AlignHCenter) ) { \
+		currentX = (int)((((float)( width() - lineWidths.takeFirst() )) / 2.0f) + 0.5f); } \
+	else { \
+		int lineWidth = lineWidths.takeFirst(); \
+		currentX = mAlignment.testFlag(Qt::AlignLeft) ? leftMargin() : width() - lineWidth - rightMargin(); }
 
 #define lineFeed() \
 	baseLine += lastLineDescent + leading + mLineSpacing + ascent; \
@@ -476,12 +524,28 @@ void KawaiiLabel::paintEvent(QPaintEvent *event)
 	QFontMetrics bottomMetrics(mBottomFont);
 	QPainter painter(this);
 
+	int docHeight = 0;
+	QList<int> lineWidths;
+	calculateLineSizes(&docHeight, &lineWidths);
+
 	int currentX = leftMargin();
 	int leading = bottomMetrics.leading();
-	int baseLine = topMargin() - leading - mLineSpacing;
+
+	int baseLine = 0;
+	if( mAlignment.testFlag(Qt::AlignVCenter) ) // center
+	{
+		baseLine = (int)((( (float)(height() - docHeight) ) / 2.0f) + 0.5f);
+	}
+	else // top or bottom
+	{
+		baseLine = topMargin() - leading - mLineSpacing;
+		if( mAlignment.testFlag(Qt::AlignBottom) )
+			baseLine += height() - docHeight - bottomMargin();
+	}
 
 	int lastLineDescent = 0;
 	int ascent = 0, lineHeight = 0;
+
 	for(int z = 0; z < mLines.count(); z++)
 	{
 		FontChunks chunks = mLines.at(z);
@@ -777,9 +841,24 @@ QPair<int, int> KawaiiLabel::textIndexAt(const QPoint& point) const
 {
 	QFontMetrics bottomMetrics(mBottomFont);
 
+	int docHeight = 0;
+	QList<int> lineWidths;
+	calculateLineSizes(&docHeight, &lineWidths);
+
 	int currentX = leftMargin();
-	int baseLine = topMargin();
 	int leading = bottomMetrics.leading();
+
+	int baseLine = 0;
+	if( mAlignment.testFlag(Qt::AlignVCenter) ) // center
+	{
+		baseLine = (int)((( (float)(height() - docHeight) ) / 2.0f) + 0.5f);
+	}
+	else // top or bottom
+	{
+		baseLine = topMargin() - leading - mLineSpacing;
+		if( mAlignment.testFlag(Qt::AlignBottom) )
+			baseLine += height() - docHeight - bottomMargin();
+	}
 
 	int lastLineDescent = 0;
 	int ascent = 0, lineHeight = 0;
@@ -857,6 +936,16 @@ QPair<int, int> KawaiiLabel::textIndexAt(const QPoint& point) const
 	}
 
 	return QPair<int, int>(0, 0);
+};
+
+Qt::Alignment KawaiiLabel::alignment() const
+{
+	return mAlignment;
+};
+
+void KawaiiLabel::setAlignment(Qt::Alignment alignment)
+{
+	mAlignment = alignment;
 };
 
 void KawaiiLabel::mousePressEvent(QMouseEvent *event)

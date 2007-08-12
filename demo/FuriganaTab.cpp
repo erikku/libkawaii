@@ -68,8 +68,19 @@ FuriganaTab::FuriganaTab(QWidget *parent) : QWidget(parent)
 	//mConvertResult->setReadOnly(true);
 	mConvertResult->setToolTip( tr("The text that has been converted ends up here.") );
 
+	QFont topFont = font();
+	topFont.setFamily("mikachan");
+	topFont.setPointSize(6);
+	topFont.setUnderline(true);
+	QFont bottomFont = font();
+	bottomFont.setPointSize(14);
+	bottomFont.setFamily("mikachan");
+	bottomFont.setUnderline(true);
+
 	// Convert Ruby
 	mConvertRuby = new KawaiiLabel;
+	mConvertRuby->setFont(bottomFont);
+	mConvertRuby->setRubyFont(topFont);
 	mConvertRuby->setToolTip( tr("The text that has been converted ends up here.") );
 
 	QGridLayout *gridLayout = new QGridLayout;

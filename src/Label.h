@@ -31,7 +31,7 @@ class RubyState;
 /// @TODO Finish allowing the developer to change all the properties
 /// @TODO Implement minimum size and size hints
 /// @TODO Get KawaiiLabel handeling style sheets
-/// @TODO Implement line alignment
+/// @TODO Implement justify line alignment
 
 class KawaiiLabel : public QWidget
 {
@@ -41,6 +41,7 @@ class KawaiiLabel : public QWidget
 	Q_PROPERTY(int rightMargin READ rightMargin WRITE setRightMargin)
 	Q_PROPERTY(int bottomMargin READ bottomMargin WRITE setBottomMargin)
 	Q_PROPERTY(int topMargin READ topMargin WRITE setTopMargin)
+	Q_PROPERTY(Qt::Alignment alignment READ alignment WRITE setAlignment)
 	Q_PROPERTY(QFont font READ font WRITE setFont)
 	Q_PROPERTY(QFont rubyFont READ rubyFont WRITE setRubyFont)
 
@@ -53,6 +54,8 @@ public:
 	int rightMargin() const;
 	int bottomMargin() const;
 	int topMargin() const;
+
+	Qt::Alignment alignment() const;
 
 	QFont font() const;
 	QFont rubyFont() const;
@@ -67,6 +70,8 @@ public slots:
 	void setBottomMargin(int bottomMargin);
 	void setTopMargin(int topMargin);
 	void setText(const QString& text);
+
+	void setAlignment(Qt::Alignment alignment);
 
 	void setFont(const QFont& font);
 	void setRubyFont(const QFont& rubyFont);
@@ -84,6 +89,7 @@ protected:
 
 	void processLine(const QString& text, int initial_start, int end, RubyState *state);
 	void flushText(const QString& text, int start, int pos, RubyState *state);
+	void calculateLineSizes(int *docHeight, QList<int> *lineWidths) const;
 
 	QPair<QStringList, QStringList> splitRuby(const QString& text) const;
 	virtual void paintEvent(QPaintEvent *event);
@@ -93,6 +99,8 @@ protected:
 
 	int mMaxAscent, mMaxLineHeight;
 	QList<int> mLineAscent, mLineHeight;
+
+	Qt::Alignment mAlignment;
 
 	QPen mBottomPen, mTopPen;
 	QFont mTopFont, mBottomFont;
