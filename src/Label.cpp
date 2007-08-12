@@ -470,7 +470,7 @@ void KawaiiLabel::calculateLineSizes(int *docHeight, QList<int> *lineWidths) con
 
 		// Handle a new line
 		currentX = leftMargin();
-		baseLine += lastLineDescent + leading + mLineSpacing + ascent; \
+		baseLine += lastLineDescent + leading + mLineSpacing + ascent;
 		if((baseLine + bottomMargin()) > height())
 		{
 			lineWidths->append(currentX);
@@ -490,20 +490,18 @@ void KawaiiLabel::calculateLineSizes(int *docHeight, QList<int> *lineWidths) con
 				// Handle a new line
 				lineWidths->append(currentX);
 				currentX = leftMargin();
-				baseLine += lastLineDescent + leading + mLineSpacing + ascent; \
+				baseLine += lastLineDescent + leading + mLineSpacing + ascent;
 				if((baseLine + bottomMargin()) > height())
-				{
-					lineWidths->append(currentX);
 					return;
-				}
+
 				(*docHeight) = baseLine + (lineHeight - ascent - 1);
 			}
 
 			currentX += chunks.at(i)->width + leading + 1;
 		}
-	}
 
-	lineWidths->append(currentX);
+		lineWidths->append(currentX);
+	}
 };
 
 #define carriageReturn() \

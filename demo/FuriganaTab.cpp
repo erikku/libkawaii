@@ -81,6 +81,7 @@ FuriganaTab::FuriganaTab(QWidget *parent) : QWidget(parent)
 	mConvertRuby = new KawaiiLabel;
 	mConvertRuby->setFont(bottomFont);
 	mConvertRuby->setRubyFont(topFont);
+	mConvertRuby->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	mConvertRuby->setToolTip( tr("The text that has been converted ends up here.") );
 
 	QGridLayout *gridLayout = new QGridLayout;
