@@ -79,6 +79,7 @@ FuriganaTab::FuriganaTab(QWidget *parent) : QWidget(parent)
 
 	// Convert Ruby
 	mConvertRuby = new KawaiiLabel;
+	mConvertRuby->setWordWrap(true);
 	mConvertRuby->setFont(bottomFont);
 	mConvertRuby->setRubyFont(topFont);
 	mConvertRuby->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);

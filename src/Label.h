@@ -28,7 +28,6 @@ typedef QList<FontChunk*> FontChunks;
 
 class RubyState;
 
-/// @TODO Finish allowing the developer to change all the properties
 /// @TODO Implement minimum size and size hints
 /// @TODO Get KawaiiLabel handeling style sheets
 /// @TODO Implement justify line alignment
@@ -41,9 +40,15 @@ class KawaiiLabel : public QWidget
 	Q_PROPERTY(int rightMargin READ rightMargin WRITE setRightMargin)
 	Q_PROPERTY(int bottomMargin READ bottomMargin WRITE setBottomMargin)
 	Q_PROPERTY(int topMargin READ topMargin WRITE setTopMargin)
+	Q_PROPERTY(bool wordWrap READ wordWrap WRITE setWordWrap)
+	Q_PROPERTY(bool equalLines READ equalLines WRITE setEqualLines)
+	Q_PROPERTY(int lineSpacing READ lineSpacing WRITE setLineSpacing)
+	Q_PROPERTY(bool ignoreRubyDescent READ ignoreRubyDescent WRITE setIgnoreRubyDescent)
 	Q_PROPERTY(Qt::Alignment alignment READ alignment WRITE setAlignment)
 	Q_PROPERTY(QFont font READ font WRITE setFont)
 	Q_PROPERTY(QFont rubyFont READ rubyFont WRITE setRubyFont)
+	Q_PROPERTY(QPen pen READ pen WRITE setPen)
+	Q_PROPERTY(QPen rubyPen READ rubyPen WRITE setRubyPen)
 
 public:
 	KawaiiLabel(QWidget *parent = 0);
@@ -54,11 +59,17 @@ public:
 	int rightMargin() const;
 	int bottomMargin() const;
 	int topMargin() const;
+	QString text() const;
 
+	bool wordWrap() const;
+	bool equalLines() const;
+	int lineSpacing() const;
+	bool ignoreRubyDescent() const;
 	Qt::Alignment alignment() const;
-
-	QFont font() const;
 	QFont rubyFont() const;
+
+	QPen pen() const;
+	QPen rubyPen() const;
 
 	QString textAt(const QPoint& point) const;
 	QPair<int, int> textIndexAt(const QPoint& point) const;
@@ -71,15 +82,22 @@ public slots:
 	void setTopMargin(int topMargin);
 	void setText(const QString& text);
 
+	void setWordWrap(bool wrap);
+	void setEqualLines(bool equal);
+	void setLineSpacing(int spacing);
+	void setIgnoreRubyDescent(bool ignore);
 	void setAlignment(Qt::Alignment alignment);
-
-	void setFont(const QFont& font);
 	void setRubyFont(const QFont& rubyFont);
 
+	void setPen(const QPen& pen);
+	void setRubyPen(const QPen& pen);
+
 protected:
+	virtual void changeEvent(QEvent *event);
 	virtual void mousePressEvent(QMouseEvent *event);
 
 	void clearChunks();
+	void generateChunks();
 
 	FontChunk* mergeChunks(const FontChunks chunks, const QFont& font) const;
 	FontChunk* createChunk(const QChar& character, const QFont& font, const QPen& pen) const;
@@ -102,9 +120,10 @@ protected:
 
 	Qt::Alignment mAlignment;
 
+	QFont mRubyFont;
 	QPen mBottomPen, mTopPen;
-	QFont mTopFont, mBottomFont;
 
+	bool mWordWrap;
 	int mRubySpacing;
 	int mLineSpacing;
 	bool mEqualLines;

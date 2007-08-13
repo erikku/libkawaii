@@ -66,22 +66,21 @@ public:
 };
 
 KawaiiLabel::KawaiiLabel(QWidget *parent) : QWidget(parent), mRubySpacing(2), mLineSpacing(3), mIgnoreRubyDescent(true),
-	mEqualLines(false), mAlignment(Qt::AlignTop | Qt::AlignLeft)
+	mEqualLines(false), mAlignment(Qt::AlignTop | Qt::AlignLeft), mWordWrap(false)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setMinimumSize(100, 100);
 	setMargin(6);
 
 	mTopPen = QPen();
-	mTopFont = font();
-	mBottomFont = font();
-	mTopFont.setPointSize( (int)(mBottomFont.pointSize() * 0.4f + 0.5f) );
+	mRubyFont = font();
+	mRubyFont.setPointSize( (int)(font().pointSize() * 0.4f + 0.5f) );
 	mTopPen.setBrush( palette().brush(QPalette::Active, QPalette::Text) );
 	mBottomPen = mTopPen;
 };
 
 KawaiiLabel::KawaiiLabel(const QString& text, QWidget *parent) : QWidget(parent), mRubySpacing(2), mLineSpacing(3), mIgnoreRubyDescent(true),
-	mEqualLines(false), mAlignment(Qt::AlignTop | Qt::AlignLeft)
+	mEqualLines(false), mAlignment(Qt::AlignTop | Qt::AlignLeft), mWordWrap(false)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setMinimumSize(100, 100);
@@ -89,9 +88,8 @@ KawaiiLabel::KawaiiLabel(const QString& text, QWidget *parent) : QWidget(parent)
 	setText(text);
 
 	mTopPen = QPen();
-	mTopFont = font();
-	mBottomFont = font();
-	mTopFont.setPointSize( (int)(mBottomFont.pointSize() * 0.4f + 0.5f) );
+	mRubyFont = font();
+	mRubyFont.setPointSize( (int)(font().pointSize() * 0.4f + 0.5f) );
 	mTopPen.setBrush( palette().brush(QPalette::Active, QPalette::Text) );
 	mBottomPen = mTopPen;
 };
@@ -101,16 +99,28 @@ KawaiiLabel::~KawaiiLabel()
 	clearChunks();
 };
 
+QString KawaiiLabel::text() const
+{
+	return mText;
+};
+
 void KawaiiLabel::setText(const QString& text)
 {
 	mText = text;
 	clearChunks();
 
+	generateChunks();
+};
+
+void KawaiiLabel::generateChunks()
+{
+	QString text = mText;
+
 	RubyState state;
 	state.topPen.push(mTopPen);
-	state.topFont.push(mTopFont);
+	state.topFont.push(mRubyFont);
 	state.bottomPen.push(mBottomPen);
-	state.bottomFont.push(mBottomFont);
+	state.bottomFont.push(font());
 
 	int start = 0, end = 0;
 
@@ -255,13 +265,13 @@ void KawaiiLabel::processLine(const QString& text, int initial_start, int end, R
 				if( !state->topPen.count() )
 				{
 					state->topPen.push(mTopPen);
-					state->topFont.push(mTopFont);
+					state->topFont.push(mRubyFont);
 				}
 
 				if( !state->bottomPen.count() )
 				{
 					state->bottomPen.push(mBottomPen);
-					state->bottomFont.push(mBottomFont);
+					state->bottomFont.push(font());
 				}
 			}
 			else
@@ -320,12 +330,12 @@ void KawaiiLabel::processLine(const QString& text, int initial_start, int end, R
 				{
 					if(state->rubyState != "rt")
 					{
-						bottomFont = mBottomFont;
+						bottomFont = font();
 						bottomPen = mBottomPen;
 					}
 					if(state->rubyState != "rb")
 					{
-						topFont = mTopFont;
+						topFont = mRubyFont;
 						topPen = mTopPen;
 					}
 				}
@@ -408,9 +418,9 @@ void KawaiiLabel::processLine(const QString& text, int initial_start, int end, R
 		for(int i = 0; i < bottom.count(); i++)
 		{
 			if(top.at(i).isEmpty())
-				chunks << createNormalChunks(bottom.at(i), mBottomFont, mPen);
+				chunks << createNormalChunks(bottom.at(i), font(), mPen);
 			else
-				chunks << createRubyChunk(bottom.at(i), mBottomFont, top.at(i), mTopFont, mPen);
+				chunks << createRubyChunk(bottom.at(i), font(), top.at(i), mRubyFont, mPen);
 		}
 
 		mLines << chunks;
@@ -448,7 +458,7 @@ void KawaiiLabel::flushText(const QString& text, int start, int pos, RubyState *
 
 void KawaiiLabel::calculateLineSizes(int *docHeight, QList<int> *lineWidths) const
 {
-	QFontMetrics bottomMetrics(mBottomFont);
+	QFontMetrics bottomMetrics(font());
 
 	int currentX = leftMargin();
 	int leading = bottomMetrics.leading();
@@ -485,8 +495,11 @@ void KawaiiLabel::calculateLineSizes(int *docHeight, QList<int> *lineWidths) con
 			runningWidth += chunks.at(i)->width;
 			if((runningWidth + rightMargin()) > width())
 			{
+				if(!mWordWrap) // If we are not word wrapping, finish this line
+					break;
+
 				runningWidth = 0;
-				
+	
 				// Handle a new line
 				lineWidths->append(currentX);
 				currentX = leftMargin();
@@ -519,7 +532,7 @@ void KawaiiLabel::paintEvent(QPaintEvent *event)
 {
 	/// @TODO Make everything work with vertical text too
 
-	QFontMetrics bottomMetrics(mBottomFont);
+	QFontMetrics bottomMetrics(font());
 	QPainter painter(this);
 
 	int docHeight = 0;
@@ -562,6 +575,9 @@ void KawaiiLabel::paintEvent(QPaintEvent *event)
 			runningWidth += chunks.at(i)->width;
 			if((runningWidth + rightMargin()) > width())
 			{
+				if(!mWordWrap) // If we are not word wrapping, finish this line
+					break;
+
 				runningWidth = 0;
 				carriageReturn();
 				lineFeed();
@@ -768,6 +784,7 @@ int KawaiiLabel::leftMargin() const
 void KawaiiLabel::setLeftMargin(int leftMargin)
 {
 	mLeftMargin = leftMargin;
+	update();
 };
 
 int KawaiiLabel::rightMargin() const
@@ -778,6 +795,7 @@ int KawaiiLabel::rightMargin() const
 void KawaiiLabel::setRightMargin(int rightMargin)
 {
 	mRightMargin = rightMargin;
+	update();
 };
 
 int KawaiiLabel::bottomMargin() const
@@ -788,6 +806,7 @@ int KawaiiLabel::bottomMargin() const
 void KawaiiLabel::setBottomMargin(int bottomMargin)
 {
 	mBottomMargin = bottomMargin;
+	update();
 };
 
 int KawaiiLabel::topMargin() const
@@ -798,6 +817,7 @@ int KawaiiLabel::topMargin() const
 void KawaiiLabel::setTopMargin(int topMargin)
 {
 	mTopMargin = topMargin;
+	update();
 };
 
 void KawaiiLabel::setMargin(int margin)
@@ -808,24 +828,89 @@ void KawaiiLabel::setMargin(int margin)
 	setTopMargin(margin);
 };
 
-QFont KawaiiLabel::font() const
+bool KawaiiLabel::wordWrap() const
 {
-	return mBottomFont;
+	return mWordWrap;
+};
+
+void KawaiiLabel::setWordWrap(bool wrap)
+{
+	mWordWrap = wrap;
+	update();
+};
+
+bool KawaiiLabel::equalLines() const
+{
+	return mEqualLines;
+};
+
+void KawaiiLabel::setEqualLines(bool equal)
+{
+	mEqualLines = equal;
+	update();
+};
+
+int KawaiiLabel::lineSpacing() const
+{
+	return mLineSpacing;
+};
+
+void KawaiiLabel::setLineSpacing(int spacing)
+{
+	mLineSpacing = spacing;
+	update();
+};
+
+bool KawaiiLabel::ignoreRubyDescent() const
+{
+	return mIgnoreRubyDescent;
+};
+
+void KawaiiLabel::setIgnoreRubyDescent(bool ignore)
+{
+	mIgnoreRubyDescent = ignore;
+	update();
 };
 
 QFont KawaiiLabel::rubyFont() const
 {
-	return mTopFont;
+	return mRubyFont;
 };
 
-void KawaiiLabel::setFont(const QFont& font)
+void KawaiiLabel::changeEvent(QEvent *event)
 {
-	mBottomFont = font;
+	if(event->type() == QEvent::FontChange)
+		generateChunks();
+
+	QWidget::changeEvent(event);
 };
 
 void KawaiiLabel::setRubyFont(const QFont& rubyFont)
 {
-	mTopFont = rubyFont;
+	mRubyFont = rubyFont;
+	generateChunks();
+};
+
+QPen KawaiiLabel::pen() const
+{
+	return mBottomPen;
+};
+
+void KawaiiLabel::setPen(const QPen& pen)
+{
+	mBottomPen = pen;
+	generateChunks();
+};
+
+QPen KawaiiLabel::rubyPen() const
+{
+	return mTopPen;
+};
+
+void KawaiiLabel::setRubyPen(const QPen& pen)
+{
+	mTopPen = pen;
+	generateChunks();
 };
 
 QString KawaiiLabel::textAt(const QPoint& point) const
@@ -837,7 +922,7 @@ QString KawaiiLabel::textAt(const QPoint& point) const
 
 QPair<int, int> KawaiiLabel::textIndexAt(const QPoint& point) const
 {
-	QFontMetrics bottomMetrics(mBottomFont);
+	QFontMetrics bottomMetrics(font());
 
 	int docHeight = 0;
 	QList<int> lineWidths;
@@ -888,6 +973,9 @@ QPair<int, int> KawaiiLabel::textIndexAt(const QPoint& point) const
 			runningWidth += chunks.at(i)->width;
 			if((runningWidth + rightMargin()) > width())
 			{
+				if(!mWordWrap) // If we are not word wrapping, finish this line
+					break;
+
 				runningWidth = 0;
 				carriageReturn();
 				lineFeed() QPair<int, int>(0, 0);
@@ -944,6 +1032,7 @@ Qt::Alignment KawaiiLabel::alignment() const
 void KawaiiLabel::setAlignment(Qt::Alignment alignment)
 {
 	mAlignment = alignment;
+	update();
 };
 
 void KawaiiLabel::mousePressEvent(QMouseEvent *event)
