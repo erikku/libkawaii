@@ -74,6 +74,10 @@ public:
 	QString textAt(const QPoint& point) const;
 	QPair<int, int> textIndexAt(const QPoint& point) const;
 
+signals:
+	void textClicked(Qt::MouseButton button, const QString& text);
+	void textClicked(Qt::MouseButton button, int index, int length);
+
 public slots:
 	void setMargin(int margin);
 	void setLeftMargin(int leftMargin);
@@ -94,7 +98,7 @@ public slots:
 
 protected:
 	virtual void changeEvent(QEvent *event);
-	virtual void mousePressEvent(QMouseEvent *event);
+	virtual void mouseReleaseEvent(QMouseEvent *event);
 
 	void clearChunks();
 	void generateChunks();

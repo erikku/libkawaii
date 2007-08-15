@@ -1035,7 +1035,12 @@ void KawaiiLabel::setAlignment(Qt::Alignment alignment)
 	update();
 };
 
-void KawaiiLabel::mousePressEvent(QMouseEvent *event)
+void KawaiiLabel::mouseReleaseEvent(QMouseEvent *event)
 {
+	QPair<int, int> index = textIndexAt( event->pos() );
+
+	emit textClicked( event->button(), index.first, index.second );
+	emit textClicked( event->button(), text().mid(index.first, index.second) );
+
 	std::cout << "Text at (" << event->x() << ", " << event->y() << "): " << textAt( event->pos() ).toLocal8Bit().data() << std::endl;
 };

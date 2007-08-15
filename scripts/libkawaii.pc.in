@@ -23,5 +23,5 @@ includedir=${prefix}/include
 Name: libkawaii
 Description: A Japanese language support library for Qt4
 Version: @LIBKAWAII_SANE_VERSION@
-Libs: -L${libdir} -lkawaii @CHASEN_LIBRARIES@
+Libs: -L${libdir} -L@CHASEN_INCLUDE_DIR@ -lkawaii -lchasen
 Cflags: -I${includedir}
