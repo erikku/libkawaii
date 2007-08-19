@@ -24,9 +24,11 @@
 #include <QtGui/QComboBox>
 #include <QtGui/QGridLayout>
 #include <QtGui/QVBoxLayout>
+#include <QtGui/QMessageBox>
 
 #include <kawaii/ChasenUtils.h>
 #include <kawaii/Label.h>
+#include <iostream>
 
 FuriganaTab::FuriganaTab(QWidget *parent) : QWidget(parent)
 {
@@ -106,6 +108,7 @@ FuriganaTab::FuriganaTab(QWidget *parent) : QWidget(parent)
 	connect(mEntryEdit, SIGNAL(textChanged()), this, SLOT(updateResult()));
 	connect(mConvertResult, SIGNAL(textChanged()), this, SLOT(updateFurigana()));
 	connect(mRubyCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateResult()));
+	connect(mConvertRuby, SIGNAL(textClicked(Qt::MouseButton, int, int)), this, SLOT(handleRubyClick(Qt::MouseButton, int, int)));
 
 	mEntryEdit->setText( QString::fromUtf8("毎日あなたにもらえる勇気") );
 };
@@ -123,4 +126,49 @@ void FuriganaTab::updateResult()
 void FuriganaTab::updateFurigana()
 {
 	mConvertRuby->setText( parseRuby(mConvertResult->toPlainText(), Normal) );
+};
+
+void FuriganaTab::handleRubyClick(Qt::MouseButton button, int index, int length)
+{
+	QString text = mConvertRuby->text();
+
+	int openIndex = QRegExp("<ruby>").indexIn(text, index + length);
+	int closeIndex = QRegExp("</ruby>").indexIn(text, index + length);
+
+	int isInside = false;
+	if( openIndex > closeIndex )
+	{
+		isInside = true;
+	}
+	else
+	{
+		if(openIndex == -1 && closeIndex != -1)
+			isInside = true;
+		else
+			isInside = false;
+	}
+
+	QString word;
+	if(isInside)
+	{
+		openIndex = QRegExp("<ruby>").lastIndexIn( text.left(index) );
+		word = parseRuby(text.mid(openIndex, (closeIndex + 7) - openIndex), Bottom);
+	}
+	else
+	{
+		int currentIndex = 0;
+		QList<ChasenEntry> entries = chasenBreakDown(text);
+		foreach(ChasenEntry entry, entries)
+		{
+			// Check if the letter is in this word
+			if( index >= currentIndex && index < currentIndex + entry.original.length() )
+			{
+				word = entry.original;
+				break;
+			}
+			currentIndex += entry.original.length();
+		}
+	}
+
+	QMessageBox::information(this, tr("Kawaii Demo"), tr("The word you are looking for is: %1").arg(word));
 };

@@ -74,6 +74,8 @@ public:
 	QString textAt(const QPoint& point) const;
 	QPair<int, int> textIndexAt(const QPoint& point) const;
 
+	virtual QSize sizeHint() const;
+
 signals:
 	void textClicked(Qt::MouseButton button, const QString& text);
 	void textClicked(Qt::MouseButton button, int index, int length);
@@ -111,7 +113,7 @@ protected:
 
 	void processLine(const QString& text, int initial_start, int end, RubyState *state);
 	void flushText(const QString& text, int start, int pos, RubyState *state);
-	void calculateLineSizes(int *docHeight, QList<int> *lineWidths) const;
+	void calculateLineSizes(int *docHeight, QList<int> *lineWidths, bool visible = true) const;
 
 	QPair<QStringList, QStringList> splitRuby(const QString& text) const;
 	virtual void paintEvent(QPaintEvent *event);

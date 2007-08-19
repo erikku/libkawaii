@@ -27,7 +27,7 @@
 #include <QtCore/QMap>
 #include <QtCore/QDir>
 #include <chasen.h>
-
+#include <iostream>
 #include "KanaConversion.h"
 
 bool chasenLoaded = false;
@@ -43,12 +43,13 @@ void loadChasen()
 
 	char *argv[5];
 
+	QByteArray app = qApp->arguments().at(0).toLocal8Bit();
+	QByteArray path = QDir::toNativeSeparators(QString(LIBKAWAII_INSTALL_PREFIX) + "/share/libkawaii/chasenrc").toLocal8Bit();
 	//QString path = QDir::toNativeSeparators(qApp->applicationDirPath() + "/chasenrc");
-	QString path = QDir::toNativeSeparators(QString(LIBKAWAII_INSTALL_PREFIX) + "/share/libkawaii/chasenrc");
 
-	char *argv0 = "chasendemo";
+	char *argv0 = app.data();
 	char *argv1 = "-r";
-	char *argv2 = path.toLocal8Bit().data();
+	char *argv2 = path.data();
 	char *argv3 = "-i";
 	char *argv4 = "w";
 
@@ -103,6 +104,8 @@ void loadChasen()
 	bracketCounterparts[ QString::fromUtf8(">") ] = QString::fromUtf8("<");
 	bracketCounterparts[ QString::fromUtf8("[") ] = QString::fromUtf8("]");
 	bracketCounterparts[ QString::fromUtf8("]") ] = QString::fromUtf8("[");
+
+	std::cerr << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << std::endl;
 
 	chasen_getopt_argv(argv, 0);
 	chasenLoaded = true;

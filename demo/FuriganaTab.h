@@ -39,6 +39,7 @@ public:
 public slots:
 	void updateResult();
 	void updateFurigana();
+	void handleRubyClick(Qt::MouseButton button, int index, int length);
 
 protected:
 	QMap<QString, RubyFormat> mRubyFormats;

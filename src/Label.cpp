@@ -68,8 +68,7 @@ public:
 KawaiiLabel::KawaiiLabel(QWidget *parent) : QWidget(parent), mRubySpacing(2), mLineSpacing(3), mIgnoreRubyDescent(true),
 	mEqualLines(false), mAlignment(Qt::AlignTop | Qt::AlignLeft), mWordWrap(false)
 {
-	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	setMinimumSize(100, 100);
+	setMinimumSize(10, 10);
 	setMargin(6);
 
 	mTopPen = QPen();
@@ -82,8 +81,7 @@ KawaiiLabel::KawaiiLabel(QWidget *parent) : QWidget(parent), mRubySpacing(2), mL
 KawaiiLabel::KawaiiLabel(const QString& text, QWidget *parent) : QWidget(parent), mRubySpacing(2), mLineSpacing(3), mIgnoreRubyDescent(true),
 	mEqualLines(false), mAlignment(Qt::AlignTop | Qt::AlignLeft), mWordWrap(false)
 {
-	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	setMinimumSize(100, 100);
+	setMinimumSize(10, 10);
 	setMargin(6);
 	setText(text);
 
@@ -93,6 +91,23 @@ KawaiiLabel::KawaiiLabel(const QString& text, QWidget *parent) : QWidget(parent)
 	mTopPen.setBrush( palette().brush(QPalette::Active, QPalette::Text) );
 	mBottomPen = mTopPen;
 };
+
+QSize KawaiiLabel::sizeHint() const
+{
+	int docHeight;
+	QList<int> lineWidths;
+
+	calculateLineSizes(&docHeight, &lineWidths, false);
+
+	int width = 0;
+	foreach(int lineWidth, lineWidths)
+		if(lineWidth > width) width = lineWidth;
+
+	width += leftMargin() + rightMargin();
+	int height = docHeight + topMargin() + bottomMargin();
+
+	return QSize(width, height);
+}
 
 KawaiiLabel::~KawaiiLabel()
 {
@@ -110,6 +125,7 @@ void KawaiiLabel::setText(const QString& text)
 	clearChunks();
 
 	generateChunks();
+	setMinimumSize( sizeHint() );
 };
 
 void KawaiiLabel::generateChunks()
@@ -160,6 +176,7 @@ void KawaiiLabel::generateChunks()
 	}
 
 	update();
+	updateGeometry();
 };
 
 void KawaiiLabel::processLine(const QString& text, int initial_start, int end, RubyState *state)
@@ -456,7 +473,7 @@ void KawaiiLabel::flushText(const QString& text, int start, int pos, RubyState *
 	// This is inside a ruby tag but not inside <rb> or <rt>, ignore it
 };
 
-void KawaiiLabel::calculateLineSizes(int *docHeight, QList<int> *lineWidths) const
+void KawaiiLabel::calculateLineSizes(int *docHeight, QList<int> *lineWidths, bool visible) const
 {
 	QFontMetrics bottomMetrics(font());
 
@@ -467,7 +484,7 @@ void KawaiiLabel::calculateLineSizes(int *docHeight, QList<int> *lineWidths) con
 	int lastLineDescent = 0;
 	int ascent = 0, lineHeight = 0;
 
-	(*docHeight) = -topMargin();
+	(*docHeight) = 0;
 	lineWidths->clear();
 
 	for(int z = 0; z < mLines.count(); z++)
@@ -481,12 +498,14 @@ void KawaiiLabel::calculateLineSizes(int *docHeight, QList<int> *lineWidths) con
 		// Handle a new line
 		currentX = leftMargin();
 		baseLine += lastLineDescent + leading + mLineSpacing + ascent;
-		if((baseLine + bottomMargin()) > height())
+
+		// Stop adding, but only if we are clipping to the widget size (rendering and not sizeHint)
+		if((baseLine + bottomMargin()) > height() && visible)
 		{
 			lineWidths->append(currentX);
+			(*docHeight) = baseLine + (lineHeight - ascent - 1) - topMargin();
 			return;
 		}
-		(*docHeight) = baseLine + (lineHeight - ascent - 1);
 
 		int runningWidth = 0;
 
@@ -504,10 +523,11 @@ void KawaiiLabel::calculateLineSizes(int *docHeight, QList<int> *lineWidths) con
 				lineWidths->append(currentX);
 				currentX = leftMargin();
 				baseLine += lastLineDescent + leading + mLineSpacing + ascent;
-				if((baseLine + bottomMargin()) > height())
+				if((baseLine + bottomMargin()) > height() && visible)
+				{
+					(*docHeight) = baseLine + (lineHeight - ascent - 1) - topMargin();
 					return;
-
-				(*docHeight) = baseLine + (lineHeight - ascent - 1);
+				}
 			}
 
 			currentX += chunks.at(i)->width + leading + 1;
@@ -515,6 +535,8 @@ void KawaiiLabel::calculateLineSizes(int *docHeight, QList<int> *lineWidths) con
 
 		lineWidths->append(currentX);
 	}
+
+	(*docHeight) = baseLine + (lineHeight - ascent - 1) - topMargin();
 };
 
 #define carriageReturn() \
@@ -1042,5 +1064,5 @@ void KawaiiLabel::mouseReleaseEvent(QMouseEvent *event)
 	emit textClicked( event->button(), index.first, index.second );
 	emit textClicked( event->button(), text().mid(index.first, index.second) );
 
-	std::cout << "Text at (" << event->x() << ", " << event->y() << "): " << textAt( event->pos() ).toLocal8Bit().data() << std::endl;
+	// std::cout << "Text at (" << event->x() << ", " << event->y() << "): " << textAt( event->pos() ).toLocal8Bit().data() << std::endl;
 };
