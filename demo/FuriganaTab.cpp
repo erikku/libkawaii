@@ -142,6 +142,9 @@ void FuriganaTab::handleRubyClick(Qt::MouseButton button, int index, int length)
 	int openIndex = QRegExp("<ruby>").indexIn(text, index + length);
 	int closeIndex = QRegExp("</ruby>").indexIn(text, index + length);
 
+	std::cout << "openIndex: " << openIndex << std::endl;
+	std::cout << "closeIndex: " << closeIndex << std::endl;
+
 	int isInside = false;
 	if( openIndex > closeIndex )
 	{
@@ -155,11 +158,16 @@ void FuriganaTab::handleRubyClick(Qt::MouseButton button, int index, int length)
 			isInside = false;
 	}
 
+	std::cout << "isInside: " << (isInside ? "true" : "false") << std::endl;
+
 	QString word;
 	if(isInside)
 	{
 		openIndex = QRegExp("<ruby>").lastIndexIn( text.left(index) );
 		word = parseRuby(text.mid(openIndex, (closeIndex + 7) - openIndex), Bottom);
+		std::cout << "openIndex: " << openIndex << std::endl;
+		std::cout << "before: " << text.mid(openIndex, (closeIndex + 7) - openIndex).toLocal8Bit().data() << std::endl;
+		std::cout << "word: " << word.toLocal8Bit().data() << std::endl;
 	}
 	else
 	{
@@ -167,15 +175,22 @@ void FuriganaTab::handleRubyClick(Qt::MouseButton button, int index, int length)
 		QList<ChasenEntry> entries = chasenBreakDown(text);
 		foreach(ChasenEntry entry, entries)
 		{
+			std::cout << "currentIndex: " << currentIndex << std::endl;
+			std::cout << "entry: " << entry.original.toLocal8Bit().data() << std::endl;
+
 			// Check if the letter is in this word
 			if( index >= currentIndex && index < currentIndex + entry.original.length() )
 			{
 				word = entry.original;
+				std::cout << "currentIndex: " << currentIndex << std::endl;
+				std::cout << "word: " << word.toLocal8Bit().data() << std::endl;
 				break;
 			}
 			currentIndex += entry.original.length();
 		}
 	}
+
+	std::cout << "word: " << word.toLocal8Bit().data() << std::endl;
 
 	QMessageBox::information(this, tr("Kawaii Demo"), tr("The word you are looking for is: %1").arg(word));
 };
