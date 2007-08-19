@@ -130,7 +130,14 @@ void FuriganaTab::updateFurigana()
 
 void FuriganaTab::handleRubyClick(Qt::MouseButton button, int index, int length)
 {
+	if(length <= 0 || index < 0)
+		return;
+
 	QString text = mConvertRuby->text();
+
+	std::cout << "Using text: " << text.toLocal8Bit().data() << std::endl;
+	std::cout << "(" << index << ", " << length << "): ";
+	std::cout << text.mid(index, length).toLocal8Bit().data() << std::endl;
 
 	int openIndex = QRegExp("<ruby>").indexIn(text, index + length);
 	int closeIndex = QRegExp("</ruby>").indexIn(text, index + length);
