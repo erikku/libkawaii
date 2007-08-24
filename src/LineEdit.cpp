@@ -21,28 +21,16 @@
 #include "KanaConversion.h"
 
 #include <QtGui/QKeyEvent>
+#include <iostream>
 
-KawaiiLineEdit::KawaiiLineEdit(QWidget *parent) : QLineEdit(parent), mRomajiMode(true)
+KawaiiLineEdit::KawaiiLineEdit(QWidget *parent) : QLineEdit(parent), mRomajiMode(true), mInsertPosition(0), mDisplayMode(Hiragana)
 {
-	connect(this, SIGNAL(selectionChanged()), this, SLOT(updateCursor()));
-	connect(this, SIGNAL(cursorPositionChanged(int, int)), this, SLOT(updateCursor()));
 	connect(this, SIGNAL(textEdited(const QString&)), this, SLOT(updateText()));
 };
 
-KawaiiLineEdit::KawaiiLineEdit(const QString& contents, QWidget *parent) : QLineEdit(parent), mRomajiMode(true)
+KawaiiLineEdit::KawaiiLineEdit(const QString& contents, QWidget *parent) : QLineEdit(parent), mRomajiMode(true), mInsertPosition(0), mDisplayMode(Hiragana)
 {
-	connect(this, SIGNAL(selectionChanged()), this, SLOT(updateCursor()));
-	connect(this, SIGNAL(cursorPositionChanged(int, int)), this, SLOT(updateCursor()));
 	connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(updateText()));
-};
-
-void KawaiiLineEdit::updateCursor()
-{
-	if(!mRomajiMode)
-		return;
-
-	deselect();
-	setCursorPosition( text().length() );
 };
 
 bool KawaiiLineEdit::romajiMode()
@@ -59,8 +47,7 @@ void KawaiiLineEdit::setRomajiMode(bool enabled)
 		// If we are switching, process the text already in the box
 		if(!mRomajiMode)
 		{
-			mRealText.clear();
-			mLastText.clear();
+			mRealText = text();
 		}
 	}
 	else
@@ -70,15 +57,21 @@ void KawaiiLineEdit::setRomajiMode(bool enabled)
 		{
 			setText(mRealText);
 			mRealText.clear();
-			mLastText.clear();
-
 		}
 	}
+
+	mActiveText.clear();
+	mDisplayText.clear();
+
+	mInsertPosition = 0;
+	mDisplayMode = Hiragana;
+
+	deselect();
+	setCursorPosition( text().length() );
 
 	blockSignals(block);
 
 	mRomajiMode = enabled;
-	updateCursor();
 	updateText();
 };
 
@@ -89,22 +82,85 @@ void KawaiiLineEdit::updateText()
 
 	bool block = blockSignals(true);
 
-	mRealText += text().replace(mLastText, QString());
-	setText( romajiToKana(mRealText) );
-	mLastText = text();
+	// mDisplayText = romajiToKana(mActiveText);
+	if(mDisplayMode == Hiragana)
+		mDisplayText = katakanaToHiragana( romajiToKana(mActiveText) );
+	else
+		mDisplayText = hiraganaToKatakana( romajiToKana(mActiveText) );
+
+	QString temp = mRealText;
+	temp.insert(mInsertPosition, mDisplayText);
+	setText( temp );
+	setSelection( mInsertPosition, mDisplayText.length() );
+	// setText( mRealText + mDisplayText );
+	// setSelection( mRealText.length(), mDisplayText.length() );
 
 	blockSignals(block);
 };
 
 void KawaiiLineEdit::keyPressEvent(QKeyEvent *event)
 {
-	if(mRomajiMode && event->key() == Qt::Key_Backspace)
+	if(!mRomajiMode)
+		return QLineEdit::keyPressEvent(event);
+
+	if(!mActiveText.isEmpty() && event->key() == Qt::Key_Backspace)
 	{
 		// Remove the last character in the string (if there is one)
-		mRealText = (mRealText.length() > 0) ? mRealText.left( mRealText.length() - 1 ) : QString();
+		mActiveText.chop(1);
+
 		event->accept();
 		updateText();
 
+		return;
+	}
+	else if(event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
+	{
+		if( mActiveText.isEmpty() )
+			return QLineEdit::keyPressEvent(event);
+
+		mRealText.insert(mInsertPosition, mDisplayText);
+		mInsertPosition += mDisplayText.length();
+		mDisplayMode = Hiragana;
+
+		mDisplayText.clear();
+		mActiveText.clear();
+
+		event->accept();
+		updateText();
+
+		setCursorPosition(mInsertPosition);
+
+		return;
+	}
+	else if( !mActiveText.isEmpty() && (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right) )
+	{
+		event->accept();
+		return;
+	}
+	else if( !mActiveText.isEmpty() && event->key() == Qt::Key_F7)
+	{
+		mDisplayMode = (mDisplayMode == Hiragana) ? Katakana : Hiragana;
+		event->accept();
+		updateText();
+		return;
+	}
+
+	// Normal key, clear the text first
+	if( !event->text().isEmpty() )
+	{
+		if( mActiveText.isEmpty() )
+			mInsertPosition = cursorPosition();
+
+		// If there is a selection, delete it
+		if( !selectedText().isEmpty() && mActiveText.isEmpty() )
+		{
+			mRealText.remove(selectionStart(), selectedText().length());
+			mInsertPosition = selectionStart();
+		}
+
+		mActiveText += event->text();
+		event->accept();
+		updateText();
 		return;
 	}
 

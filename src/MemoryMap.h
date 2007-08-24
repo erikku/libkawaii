@@ -17,38 +17,41 @@
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                   *
 \******************************************************************************/
 
-#ifndef __LineEdit_h__
-#define __LineEdit_h__
+#ifndef __MemoryMap_h__
+#define __MemoryMap_h__
 
-#include <QtGui/QLineEdit>
+#include <QtCore/QString>
 
-class KawaiiLineEdit : public QLineEdit
+class MemoryMap
 {
-	Q_OBJECT
-	Q_PROPERTY(int romajiMode READ romajiMode WRITE setRomajiMode)
-
 public:
-	KawaiiLineEdit(QWidget *parent = 0);
-	KawaiiLineEdit(const QString& contents, QWidget *parent = 0);
+	MemoryMap(const QString& path, bool writable = false);
+	~MemoryMap();
 
-	bool romajiMode();
+	char* data();
+	char* data() const;
+	char* constData() const;
 
-public slots:
-	void setRomajiMode(bool enabled);
-	void updateText();
+	bool isWritable() const;
 
-protected:
-	virtual void keyPressEvent(QKeyEvent *event);
+	QString path() const;
 
-	enum
-	{
-		Hiragana,
-		Katakana
-	}mDisplayMode;
+	int size() const;
+	int length() const;
 
-	bool mRomajiMode;
-	int mInsertPosition;
-	QString mRealText, mActiveText, mDisplayText;
+private:
+	QString mPath;
+
+	char* mData;
+	int mLength;
+	bool mWritable;
+
+#if defined(Q_OS_WIN32)
+	HANDLE mFile;
+	HANDLE mMapFile;
+#else
+	int mDescriptor;
+#endif
 };
 
-#endif // __LineEdit_h__
+#endif // __MemoryMap_h__

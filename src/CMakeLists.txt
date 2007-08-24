@@ -50,6 +50,7 @@ SET(libkawaii_SRCS
 	KanaConversion.cpp
 	Label.cpp
 	LineEdit.cpp
+	MemoryMap.cpp
 )
 
 SET(libkawaii_HDRS
