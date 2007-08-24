@@ -103,8 +103,31 @@ void KawaiiLineEdit::keyPressEvent(QKeyEvent *event)
 	if(!mRomajiMode)
 		return QLineEdit::keyPressEvent(event);
 
-	if(!mActiveText.isEmpty() && event->key() == Qt::Key_Backspace)
+	if(event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Delete)
 	{
+		if( mActiveText.isEmpty() )
+		{
+			if( !selectedText().isEmpty() )
+			{
+				mRealText.remove(selectionStart(), selectedText().length());
+				mInsertPosition = selectionStart();
+			}
+			else if(event->key() == Qt::Key_Delete) // Delete after the cursor
+			{
+				mRealText.remove(cursorPosition(), 1);
+				mInsertPosition = cursorPosition();
+			}
+			else if(cursorPosition() > 0) // Delete the character before the cursor
+			{
+				mRealText.remove(cursorPosition() - 1, 1);
+				mInsertPosition = cursorPosition() - 1;
+			}
+
+			event->accept();
+			updateText();
+			return;
+		}
+
 		// Remove the last character in the string (if there is one)
 		mActiveText.chop(1);
 
@@ -132,7 +155,8 @@ void KawaiiLineEdit::keyPressEvent(QKeyEvent *event)
 
 		return;
 	}
-	else if( !mActiveText.isEmpty() && (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right) )
+	else if( !mActiveText.isEmpty() && (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right ||
+		event->key() == Qt::Key_Home || event->key() == Qt::Key_End) )
 	{
 		event->accept();
 		return;
