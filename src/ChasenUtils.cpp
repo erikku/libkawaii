@@ -44,8 +44,12 @@ void loadChasen()
 	char *argv[5];
 
 	QByteArray app = qApp->arguments().at(0).toLocal8Bit();
+
+#if defined(Q_OS_WIN32)
+	QByteArray path = QDir::toNativeSeparators(qApp->applicationDirPath() + "/chasenrc").toLocal8Bit();
+#else
 	QByteArray path = QDir::toNativeSeparators(QString(LIBKAWAII_INSTALL_PREFIX) + "/share/libkawaii/chasenrc").toLocal8Bit();
-	//QString path = QDir::toNativeSeparators(qApp->applicationDirPath() + "/chasenrc");
+#endif
 
 	char *argv0 = app.data();
 	char *argv1 = "-r";

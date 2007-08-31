@@ -49,5 +49,11 @@ SET(kawaiidemo_UIS
 QT4_WRAP_UI(kawaiidemo_UI_SRCS ${kawaiidemo_UIS})
 
 ADD_EXECUTABLE(kawaiidemo ${kawaiidemo_SRCS} ${kawaiidemo_MOC_SRCS} ${kawaiidemo_RCC_SRCS} ${kawaiidemo_UI_SRCS})
+
+IF(MINGW)
+	SET_TARGET_PROPERTIES(kawaiidemo PROPERTIES LINK_FLAGS -mwindows)
+ENDIF(MINGW)
+
 TARGET_LINK_LIBRARIES(kawaiidemo -lkawaii ${QT_LIBRARIES} ${CHASEN_LIBRARIES})
-INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/kawaiidemo DESTINATION bin)
+
+INSTALL(TARGETS kawaiidemo DESTINATION bin)
