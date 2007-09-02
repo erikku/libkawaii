@@ -212,7 +212,7 @@ QString chasenChunkConvert(const QString& chunk, ConversionType type, bool withS
 		}
 		else // This is Japanese text (called kanji here)
 		{
-			if( entries.at(i).partOfSpeech.left(3) == QString::fromUtf8("助動詞") ) // This is a auxiliary verb
+			if( entries.at(i).partOfSpeech.left(3) == QString::fromUtf8("助動詞") || entries.at(i).partOfSpeech.left(6) == QString::fromUtf8("動詞-非自立") ) // This is a auxiliary verb or dependent verb
 			{
 				if(i > 0)
 				{
