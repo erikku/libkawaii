@@ -52,6 +52,7 @@ void setupConversionTables()
 		<< QString::fromUtf8("が") << QString::fromUtf8("ぎ") << QString::fromUtf8("ぐ")
 		<< QString::fromUtf8("げ") << QString::fromUtf8("ご") << QString::fromUtf8("ざ")
 		<< QString::fromUtf8("ぢ") << QString::fromUtf8("づ") << QString::fromUtf8("ぜ")
+		<< QString::fromUtf8("ぢ") << QString::fromUtf8("づ")
 		<< QString::fromUtf8("ぞ") << QString::fromUtf8("だ") << QString::fromUtf8("じ")
 		<< QString::fromUtf8("ず") << QString::fromUtf8("で") << QString::fromUtf8("ど")
 		<< QString::fromUtf8("ば") << QString::fromUtf8("び") << QString::fromUtf8("ぶ")
@@ -92,6 +93,7 @@ void setupConversionTables()
 		<< QString::fromUtf8("ガ") << QString::fromUtf8("ギ") << QString::fromUtf8("グ")
 		<< QString::fromUtf8("ゲ") << QString::fromUtf8("ゴ") << QString::fromUtf8("ザ")
 		<< QString::fromUtf8("ヂ") << QString::fromUtf8("ヅ") << QString::fromUtf8("ゼ")
+		<< QString::fromUtf8("ヂ") << QString::fromUtf8("ヅ")
 		<< QString::fromUtf8("ゾ") << QString::fromUtf8("ダ") << QString::fromUtf8("ジ")
 		<< QString::fromUtf8("ズ") << QString::fromUtf8("デ") << QString::fromUtf8("ド")
 		<< QString::fromUtf8("バ") << QString::fromUtf8("ビ") << QString::fromUtf8("ブ")
@@ -145,6 +147,7 @@ void setupConversionTables()
 		<< QString::fromUtf8("ga") << QString::fromUtf8("gi") << QString::fromUtf8("gu")
 		<< QString::fromUtf8("ge") << QString::fromUtf8("go") << QString::fromUtf8("za")
 		<< QString::fromUtf8("ji") << QString::fromUtf8("zu") << QString::fromUtf8("ze")
+		<< QString::fromUtf8("di") << QString::fromUtf8("du")
 		<< QString::fromUtf8("zo") << QString::fromUtf8("da") << QString::fromUtf8("ji")
 		<< QString::fromUtf8("zu") << QString::fromUtf8("de") << QString::fromUtf8("do")
 		<< QString::fromUtf8("ba") << QString::fromUtf8("bi") << QString::fromUtf8("bu")
@@ -253,11 +256,15 @@ QString romajiToKana(const QString& string, bool special)
 	text.replace( "tu",  QString::fromUtf8("つ") );
 	text.replace( "xtu", QString::fromUtf8("っ") );
 	text.replace( "hu",  QString::fromUtf8("ふ") );
+	text.replace( "dzu",  QString::fromUtf8("づ") );
+	text.replace( "tya",  QString::fromUtf8("ちゃ") );
 	text.replace( "SI",  QString::fromUtf8("シ") );
 	text.replace( "TI",  QString::fromUtf8("チ") );
 	text.replace( "TU",  QString::fromUtf8("ツ") );
 	text.replace( "XTU", QString::fromUtf8("ッ") );
 	text.replace( "HU",  QString::fromUtf8("フ") );
+	text.replace( "DZU",  QString::fromUtf8("ヅ") );
+	text.replace( "TYA",  QString::fromUtf8("チャ") );
 
 	text.replace( "shi", QString::fromUtf8("し") );
 	text.replace( "chi", QString::fromUtf8("ち") );
@@ -357,8 +364,8 @@ QString kanaToRomaji(const QString& string, bool special)
     text.replace( QRegExp("/(.{1})ー/"), "\\1\\1" );
 
 	// Replace "oo" and "ou" with "ō"
-	text.replace( "oo", QString::fromUtf8("ō") );
-	text.replace( "ou", QString::fromUtf8("ō") );
+	// text.replace( "oo", QString::fromUtf8("ō") );
+	// text.replace( "ou", QString::fromUtf8("ō") );
 
 	if(!special)
 		return text;

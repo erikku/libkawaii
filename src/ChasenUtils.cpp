@@ -212,7 +212,8 @@ QString chasenChunkConvert(const QString& chunk, ConversionType type, bool withS
 		}
 		else // This is Japanese text (called kanji here)
 		{
-			if( entries.at(i).partOfSpeech.left(3) == QString::fromUtf8("助動詞") || entries.at(i).partOfSpeech.left(6) == QString::fromUtf8("動詞-非自立") ) // This is a auxiliary verb or dependent verb
+			// This is a auxiliary verb or dependent verb
+			if( entries.at(i).partOfSpeech.left(3) == QString::fromUtf8("助動詞") || entries.at(i).partOfSpeech.left(6) == QString::fromUtf8("動詞-非自立") )
 			{
 				if(i > 0)
 				{
@@ -231,7 +232,7 @@ QString chasenChunkConvert(const QString& chunk, ConversionType type, bool withS
 			{
 				if(type == Kana || type == Romaji)
 				{
-					workingText = katakanaToHiragana(entries.at(i).kana);
+					workingText = entries.at(i).kana.isEmpty() ? entries.at(i).original : katakanaToHiragana(entries.at(i).kana);
 
 					if( type == Romaji )
 					{
