@@ -18,18 +18,22 @@
 \******************************************************************************/
 
 #include "LineEdit.h"
+#include "InputContext.h"
 #include "KanaConversion.h"
 
 #include <QtGui/QKeyEvent>
 #include <iostream>
 
-KawaiiLineEdit::KawaiiLineEdit(QWidget *parent) : QLineEdit(parent), mRomajiMode(true), mInsertPosition(0), mDisplayMode(Hiragana)
+#include <QtGui/QInputContextFactory>
+
+/// @TODO Fix it from changing selection when the input box is clicked
+KawaiiLineEdit::KawaiiLineEdit(QWidget *parent) : QLineEdit(parent), mRomajiMode(false), mInsertPosition(0), mDisplayMode(Hiragana)
 {
 	connect(this, SIGNAL(textEdited(const QString&)), this, SLOT(updateText()));
 };
 
-KawaiiLineEdit::KawaiiLineEdit(const QString& contents, QWidget *parent) : QLineEdit(parent), mRomajiMode(true), mInsertPosition(0), mDisplayMode(Hiragana)
-{
+KawaiiLineEdit::KawaiiLineEdit(const QString& contents, QWidget *parent) : QLineEdit(parent), mRomajiMode(false), mInsertPosition(0), mDisplayMode(Hiragana)
+{	
 	connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(updateText()));
 };
 
@@ -189,4 +193,9 @@ void KawaiiLineEdit::keyPressEvent(QKeyEvent *event)
 	}
 
 	QLineEdit::keyPressEvent(event);
+};
+
+void KawaiiLineEdit::paintEvent(QPaintEvent *event)
+{
+	QLineEdit::paintEvent(event);
 };

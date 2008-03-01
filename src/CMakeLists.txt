@@ -47,6 +47,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/scripts/chasenrc.in ${CMAKE_BINARY_DIR}/chase
 
 SET(libkawaii_SRCS
 	ChasenUtils.cpp
+	InputContext.cpp
+	InputTrayIcon.cpp
 	KanaConversion.cpp
 	Label.cpp
 	LineEdit.cpp
@@ -54,6 +56,8 @@ SET(libkawaii_SRCS
 )
 
 SET(libkawaii_HDRS
+	InputContext.h
+	InputTrayIcon.h
 	Label.h
 	LineEdit.h
 )
@@ -61,6 +65,10 @@ SET(libkawaii_HDRS
 SET(libkawaii_HDRS_NOMOC
 	ChasenUtils.h
 	KanaConversion.h
+)
+
+SET(libkawaii_RCC
+    ../res/libkawaii.qrc
 )
 
 FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
@@ -71,6 +79,8 @@ FOREACH(current_header ${libkawaii_HDRS} ${libkawaii_HDRS_NOMOC})
 ENDFOREACH(current_header)
 
 QT4_WRAP_CPP(libkawaii_SRCS ${libkawaii_HDRS})
+
+QT4_ADD_RESOURCES(libkawaii_SRCS ${libkawaii_RCC})
 
 ADD_LIBRARY(kawaii SHARED ${libkawaii_SRCS})
 

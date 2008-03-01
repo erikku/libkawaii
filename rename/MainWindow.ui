@@ -1,0 +1,415 @@
+<ui version="4.0" >
+ <class>MainWindow</class>
+ <widget class="QWidget" name="MainWindow" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>591</width>
+    <height>651</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Kawaii Rename</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <widget class="QTabWidget" name="OptionsTabWidget" >
+     <property name="currentIndex" >
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="ReplaceTab" >
+      <attribute name="title" >
+       <string>Static Replaces</string>
+      </attribute>
+      <layout class="QGridLayout" >
+       <item row="0" column="0" >
+        <widget class="QLabel" name="ReplaceSourceLabel" >
+         <property name="text" >
+          <string>&lt;u>Source&lt;/u></string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2" >
+        <widget class="QLabel" name="ReplaceTargetLabel" >
+         <property name="text" >
+          <string>&lt;u>Target&lt;/u></string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" >
+        <widget class="TwinList" name="ReplaceSourceList" />
+       </item>
+       <item row="1" column="2" >
+        <widget class="TwinList" name="ReplaceTargetList" />
+       </item>
+       <item row="2" column="0" >
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QPushButton" name="ReplaceSourceAdd" >
+           <property name="icon" >
+            <iconset resource="resources.qrc" >:/add.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ReplaceSourceEdit" >
+           <property name="icon" >
+            <iconset resource="resources.qrc" >:/edit.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ReplaceSourceRemove" >
+           <property name="icon" >
+            <iconset resource="resources.qrc" >:/remove.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="2" column="2" >
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QPushButton" name="ReplaceTargetAdd" >
+           <property name="icon" >
+            <iconset resource="resources.qrc" >:/add.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ReplaceTargetEdit" >
+           <property name="icon" >
+            <iconset resource="resources.qrc" >:/edit.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ReplaceTargetRemove" >
+           <property name="icon" >
+            <iconset resource="resources.qrc" >:/remove.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="1" >
+        <layout class="QVBoxLayout" >
+         <item>
+          <widget class="QPushButton" name="ReplaceTopButton" >
+           <property name="icon" >
+            <iconset resource="resources.qrc" >:/top.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ReplaceUpButton" >
+           <property name="icon" >
+            <iconset resource="resources.qrc" >:/1uparrow.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ReplaceDownButton" >
+           <property name="icon" >
+            <iconset resource="resources.qrc" >:/1downarrow.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ReplaceBottomButton" >
+           <property name="icon" >
+            <iconset resource="resources.qrc" >:/bottom.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="OptionsTab" >
+      <attribute name="title" >
+       <string>Options</string>
+      </attribute>
+      <layout class="QVBoxLayout" >
+       <item>
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QGroupBox" name="FilenameSourceGroup" >
+           <property name="title" >
+            <string>Filename Source</string>
+           </property>
+           <layout class="QVBoxLayout" >
+            <item>
+             <widget class="QRadioButton" name="FilenameFromTag" >
+              <property name="text" >
+               <string>Tags first, filename if required</string>
+              </property>
+              <property name="checked" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="FilenameFromFile" >
+              <property name="text" >
+               <string>Always use the filename</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="MiscOptionsGroup" >
+           <property name="title" >
+            <string>Miscellaneous Options</string>
+           </property>
+           <layout class="QVBoxLayout" >
+            <item>
+             <layout class="QHBoxLayout" >
+              <item>
+               <widget class="QCheckBox" name="CapsOptionCheck" >
+                <property name="text" >
+                 <string>Capitalize words greater then:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="CapsOptionSpinner" >
+                <property name="maximum" >
+                 <number>30</number>
+                </property>
+                <property name="value" >
+                 <number>2</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="PatternsGroup" >
+         <property name="title" >
+          <string>String Patterns</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <layout class="QHBoxLayout" >
+            <item>
+             <widget class="QCheckBox" name="PatternsDirectoryCheck" >
+              <property name="text" >
+               <string>Rename Directory:</string>
+              </property>
+              <property name="checked" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="PatternsDirectoryEdit" />
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" >
+            <item>
+             <widget class="QLabel" name="PatternsFilenameLabel" >
+              <property name="text" >
+               <string>Filename:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="PatternsFilenameEdit" >
+              <property name="text" >
+               <string>{track} {title}.{ext}</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="WorkingDirectoryGroup" >
+     <property name="title" >
+      <string>Working Directory</string>
+     </property>
+     <layout class="QHBoxLayout" >
+      <item>
+       <widget class="QLineEdit" name="WorkingDirectoryEdit" />
+      </item>
+      <item>
+       <widget class="QPushButton" name="WorkingDirectoryBrowse" >
+        <property name="text" >
+         <string>&amp;Browse...</string>
+        </property>
+        <property name="icon" >
+         <iconset resource="resources.qrc" >:/fileopen.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="PreviewGroup" >
+     <property name="title" >
+      <string>Preview</string>
+     </property>
+     <layout class="QGridLayout" >
+      <item row="0" column="0" >
+       <widget class="QLabel" name="PreviewSourceLabel" >
+        <property name="text" >
+         <string>&lt;u>Source&lt;/u></string>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <widget class="QLabel" name="PreviewTargetLabel" >
+        <property name="text" >
+         <string>&lt;u>Target&lt;/u></string>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" >
+       <widget class="TwinList" name="PreviewSourceList" />
+      </item>
+      <item row="1" column="1" >
+       <widget class="TwinList" name="PreviewTargetList" />
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="MainLine" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="AboutButton" >
+       <property name="text" >
+        <string>&amp;About</string>
+       </property>
+       <property name="icon" >
+        <iconset resource="resources.qrc" >:/help.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="QuitButton" >
+       <property name="text" >
+        <string>&amp;Quit</string>
+       </property>
+       <property name="icon" >
+        <iconset resource="resources.qrc" >:/exit.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="RefreshButton" >
+       <property name="text" >
+        <string>Refresh</string>
+       </property>
+       <property name="icon" >
+        <iconset resource="resources.qrc" >:/reload.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="RenameButton" >
+       <property name="text" >
+        <string>&amp;Rename</string>
+       </property>
+       <property name="icon" >
+        <iconset resource="resources.qrc" >:/run.png</iconset>
+       </property>
+       <property name="autoDefault" >
+        <bool>true</bool>
+       </property>
+       <property name="default" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TwinList</class>
+   <extends>QListWidget</extends>
+   <header>TwinList.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="resources.qrc" />
+ </resources>
+ <connections/>
+</ui>

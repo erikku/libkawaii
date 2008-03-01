@@ -40,6 +40,7 @@ prefix=/usr
 defines=""
 docs=OFF
 demo=ON
+rename=ON
 
 # Parse the args
 for i in "$@"
@@ -53,6 +54,8 @@ do
 		--disable-docs )		docs=OFF ;;
 		--enable-demo )			demo=ON ;;
 		--disable-demo )		demo=OFF ;;
+		--enable-rename )		rename=ON ;;
+		--disable-rename )		rename=OFF ;;
 		* )						echo "Unrecognised argument $i" ;;
 	esac
 done
@@ -67,12 +70,18 @@ then
 	echo "--debug			Configure debug build."
 	echo "--release			Configure release build."
 	echo "--prefix=path		Installation prefix."
+	echo "--enable-docs		Enable API doc generation."
+	echo "--disable-docs		Disable API doc generation."
+	echo "--enable-demo		Enable the demo application."
+	echo "--disable-demo		Disable the demo application."
+	echo "--enable-rename		Enable the rename application."
+	echo "--disable-rename		Disable the rename application."
 	exit 0
 fi
 
 mkdir -p ./build
 cd ./build
-$CMAKE -DCMAKE_BUILD_TYPE=$build -DCMAKE_INSTALL_PREFIX=$prefix ${defines} -DBUILD_KAWAIIDEMO=$demo -DBUILD_DOCS=$docs -G "Unix Makefiles" .. || exit 1
+$CMAKE -DCMAKE_BUILD_TYPE=$build -DCMAKE_INSTALL_PREFIX=$prefix ${defines} -DBUILD_KAWAIIDEMO=$demo -DBUILD_KAWAIIRENAME=$rename -DBUILD_DOCS=$docs -G "Unix Makefiles" .. || exit 1
 cd ..
 
 echo ""

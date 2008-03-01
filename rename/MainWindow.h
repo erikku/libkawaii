@@ -17,45 +17,42 @@
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                   *
 \******************************************************************************/
 
-#include <QtGui/QApplication>
+#include <QtGui/QMainWindow>
 
-#include "MainWindow.h"
+#include "ui_MainWindow.h"
 
-#include <QtGui/QInputContextFactory>
-
-#include <kawaii/InputContext.h>
-#include <kawaii/InputTrayIcon.h>
-
-#include <iostream>
-
-Q_IMPORT_PLUGIN(kawaii_inputcontext)
-
-int main(int argc, char **argv)
+class MainWindow : public QMainWindow
 {
-	QApplication app(argc, argv);
+	Q_OBJECT
 
-	QInputContext *ctx = QInputContextFactory::create("kawaiimulti", 0);
-	if(ctx)
-	{
-		app.setInputContext(ctx);
-		if(app.inputContext() != ctx)
-			std::cout << "WTF!" << std::endl;
-	}
-	else
-	{
-		std::cout << "Error!" << std::endl;
-		foreach(QString key, QInputContextFactory::keys())
-			std::cout << key.toLocal8Bit().data() << " ";
-		std::cout << std::endl;
-	}
+public:
+	MainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
 
-	InputTrayIcon *tray = new InputTrayIcon;
-	tray->show();
+	bool isLocked() const;
 
-	MainWindow *window = new MainWindow;
-	window->show();
-	window->center();
+public slots:
+	void lock();
+	void unlock();
 
-	return app.exec();
+	void loadSettings();
+	void saveSettings();
+	void refreshList();
+	void showAbout();
+	void browseDir();
+	void center();
+
+	void addFileItem(const QString& source, const QString& target);
+	void updateFileItem(int index, const QString& src, const QString& dst);
+	void updateRenameButton();
+	void editFileName();
+
+protected:
+	virtual void closeEvent(QCloseEvent *event);
+
+	QString mLastPath;
+
+	bool mDirty;
+	bool mLocked;
+	bool mCanRename;
+	Ui::MainWindow ui;
 };
-

@@ -21,36 +21,13 @@
 
 #include "MainWindow.h"
 
-#include <QtGui/QInputContextFactory>
-
-#include <kawaii/InputContext.h>
-#include <kawaii/InputTrayIcon.h>
-
-#include <iostream>
-
-Q_IMPORT_PLUGIN(kawaii_inputcontext)
-
 int main(int argc, char **argv)
 {
 	QApplication app(argc, argv);
 
-	QInputContext *ctx = QInputContextFactory::create("kawaiimulti", 0);
-	if(ctx)
-	{
-		app.setInputContext(ctx);
-		if(app.inputContext() != ctx)
-			std::cout << "WTF!" << std::endl;
-	}
-	else
-	{
-		std::cout << "Error!" << std::endl;
-		foreach(QString key, QInputContextFactory::keys())
-			std::cout << key.toLocal8Bit().data() << " ";
-		std::cout << std::endl;
-	}
-
-	InputTrayIcon *tray = new InputTrayIcon;
-	tray->show();
+	app.setOrganizationName("libkawaii");
+	app.setOrganizationDomain("utopiaplayer.blogspot.com");
+	app.setApplicationName("Kawaii Rename");
 
 	MainWindow *window = new MainWindow;
 	window->show();
